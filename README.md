@@ -35,6 +35,6 @@ Copyright (c) 2015 Paul Graham
 
 See LICENSE for details.
 
-[zip]: https://github.com/PaulWGraham/Show-In-Terminal/archive/master.zip
+[zip]: https://github.com/PaulWGraham/GmailToPDF/archive/master.zip
 [scripting]: https://script.google.com/
 [publish]: https://developers.google.com/apps-script/guides/web#deploying_a_script_as_a_web_app
