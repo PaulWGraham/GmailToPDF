@@ -1,0 +1,198 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<style>
+h1 {
+  text-align: center;
+}
+
+body {
+  background: #dfe1e4;
+  font-family: Arial;;
+}
+
+#HeadingDiv {
+  border-radius: 20px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  background: #296cc3; 
+}
+
+#OptionsDiv {
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  border-radius: 10px;
+  /*font-size: 10px;*/
+  font-size: 70%;
+  padding: 5px;
+}
+
+#CopyrightDiv {
+  border-radius: 20px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  background: #296cc3;
+  padding: 10px;
+}
+
+#InstructionsDiv {
+  border-radius: 20px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  background: #296cc3;
+  padding: 10px;
+}
+
+#FilenameTextInput {
+  border-radius: 5px;
+  border-style: none;
+  font-family: Arial;
+  text-decoration: none;
+}
+
+#GeneratePDFButton {
+  background: #d93434;
+  border: solid #ffffff 0px;
+  border-radius: 10px;
+  color: #ffffff;
+  font-family: Arial;
+  /*font-size: 20px;*/
+  font-size: 100%;
+  padding: 4px 8px 4px 8px;
+  text-decoration: none;
+}
+
+#GeneratePDFButton:hover {
+  background: #8c1f1f;
+  text-decoration: none;
+}
+
+#MainDisplayPanel {
+  border-radius: 20px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  background: #296CC3; 
+  padding: 20px;
+}
+
+#OutputAreaDiv {
+  background: #d1d6dd; 
+  border-color: #b0c4de;
+  border-radius: 10px;
+  border-style: solid;
+  border-width: 1px;
+  padding: 5px;
+}
+</style>
+<title>Gmail To PDF</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+<script>
+$(document).ready(function() {
+     // Create global variables
+     outputAreaDiv = $("#OutputAreaDiv");
+     outputAreaHTML = "";
+     outputAreaLinkToPDF = $("<a>");
+     
+     
+     // Callback function for generatePDF.
+     function handleGeneratePDFResponse(result) {
+          outputAreaHTML = "";
+          if(result){
+            if(result.numberOfMessagesProcessed > 0) {
+                 outputAreaHTML += result.numberOfMessagesProcessed.toString();
+                 outputAreaHTML += " messages where processed.<br> The generated PDF is located at "
+               
+                 outputAreaLinkToPDF.attr("href", result.driveURLforPDF);
+                 outputAreaLinkToPDF.attr("target","_blank");
+                 outputAreaLinkToPDF.html(result.driveURLforPDF);
+               
+                 outputAreaDiv.html(outputAreaHTML);
+                 outputAreaDiv.append(outputAreaLinkToPDF);
+               
+            } else {
+                 $(this).html("starred = false");
+                 outputAreaHTML = "0 messages where processed.<br> <strong>No PDF was generated.</strong>";
+                 outputAreaDiv.html(outputAreaHTML);
+            }
+        } else {
+          // result is undefined indicating an error occured so display an error message. 
+          outputAreaHTML = "<strong>An error occured while processing the messages. Perhaps try again with different embedding options and/or with fewer starred messages.<strong><br><br>";
+          outputAreaDiv.html(outputAreaHTML);
+        }
+        $("#GeneratePDFButton").html("Generate PDF");
+        $("#GeneratePDFButton").prop("disabled", false);
+     }
+     
+     $("#GeneratePDFButton").click(function(event) {
+          $(this).prop("disabled", true);
+          $(this).html("Processing");
+          outputAreaDiv.html("<br><br>");
+          event.preventDefault();
+          var pdfFilename = $("#FilenameTextInput").val();
+          if(!pdfFilename) {
+               pdfFilename = "Emails";
+               $("#FilenameTextInput").val("Emails");
+          }
+
+          google.script.run.withSuccessHandler(handleGeneratePDFResponse).generatePDF(pdfFilename, $("#UnstarMessagesCheckbox").prop("checked"), $("#EmbedWebImagesCheckbox").prop("checked"), $("#EmbedInlineImagesCheckbox").prop("checked"),$("#EmbedAttachmentsCheckbox").prop("checked"));         
+    });
+});
+</script>
+</head>
+<body>
+
+<div id="HeadingDiv">
+<h1>Gmail To PDF</h1>
+</div>
+
+<br>
+
+<div id="MainDisplayPanel">
+<button id="GeneratePDFButton">Generate PDF</button><br><br>
+<div id="OptionsDiv">
+<input id="UnstarMessagesCheckbox" type="checkbox" checked><strong>Unstar Messages.</strong><br><br>
+<input id="EmbedWebImagesCheckbox" type="checkbox" checked><strong>Embed Web Images.</strong><br><br>
+<input id="EmbedInlineImagesCheckbox" type="checkbox" checked><strong>Embed Inline Images.</strong><br><br>
+<input id="EmbedAttachmentsCheckbox" type="checkbox"><strong>Embed Attachments.</strong><br><br>
+<strong>Filename: </strong><input id="FilenameTextInput" type="text" value="Emails"><br>
+</div>
+
+<br>
+
+<div id="OutputAreaDiv">
+<br><br>
+</div>
+<br>
+<a href="https://mail.google.com/" target="_blank">Gmail</a>
+<a href="https://drive.google.com/drive/" target="_blank">Google Drive </a>
+</div>
+
+<br>
+
+<div id="InstructionsDiv">
+<br>
+<strong>Instructions:<br>
+<ol>
+  <li>Open <a href="https://mail.google.com/" target="_blank">Gmail</a>.</li>
+  <li>Star some messages.</li>
+  <li>Open <i>Gmail To PDF</i>.</li>
+  <li>Click the <i>Generate PDF</i> button.</li>
+  <li>Open <a href="https://drive.google.com/drive/" target="_blank">Google Drive </a> to view the PDF.</li>
+</ol></strong>
+<br>
+<div id="CopyrightDiv">
+Copyright (c) 2015 Paul W. Graham.
+<br><br>
+THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+</div>
+</div>
+
+</body>
+</html>
